@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Choice</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  font-family:'Montserrat',sans-serif;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  color:#fff;
+  text-align:center;
+  transition:background 0.6s ease;
+}
+
+/* ===== THEMES ===== */
+body.friends{background:linear-gradient(135deg,#43cea2,#185a9d);}
+body.church{background:linear-gradient(135deg,#5a4634,#2e1f14);}
+body.spicy{
+  background:
+    radial-gradient(circle at top,#ff4d6d,transparent 60%),
+    linear-gradient(135deg,#8b0000,#ff0033);
+}
+body.party{
+  background:linear-gradient(45deg,#ff0080,#7928ca,#2afadf,#ff8c00);
+  background-size:400% 400%;
+  animation:party 8s ease infinite;
+}
+@keyframes party{
+  0%{background-position:0% 50%}
+  50%{background-position:100% 50%}
+  100%{background-position:0% 50%}
+}
+
+/* ===== UI ===== */
+h1{font-size:2.5rem;margin-bottom:1rem}
+#idea-box{
+  background:rgba(255,255,255,0.15);
+  backdrop-filter:blur(12px);
+  border-radius:25px;
+  padding:40px;
+  margin:20px;
+  min-width:280px;
+  max-width:90%;
+  font-size:1.3rem;
+  box-shadow:0 8px 25px rgba(0,0,0,.3);
+}
+.button-container{
+  display:flex;
+  gap:20px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+button{
+  background:#fff;
+  color:#333;
+  border:none;
+  padding:15px 35px;
+  border-radius:50px;
+  font-size:1.2rem;
+  font-weight:700;
+  cursor:pointer;
+}
+#menu-toggle{
+  position:absolute;
+  top:20px;
+  right:20px;
+  font-size:28px;
+  cursor:pointer;
+}
+#mode-menu{
+  position:absolute;
+  top:60px;
+  right:20px;
+  background:#fff;
+  color:#333;
+  border-radius:15px;
+  padding:10px;
+  display:none;
+  flex-direction:column;
+  gap:8px;
+  min-width:160px;
+}
+.mode-btn{
+  padding:10px;
+  border-radius:10px;
+  background:#eee;
+  cursor:pointer;
+  font-weight:700;
+}
+.mode-btn.selected{
+  background:#333;
+  color:#fff;
+}
+</style>
+</head>
+
+<body class="friends">
+
+<h1>Your Choice</h1>
+<div id="idea-box">Wähle Wahrheit oder Pflicht</div>
+
+<div class="button-container">
+  <button onclick="showIdea('truth')">Wahrheit</button>
+  <button onclick="showIdea('dare')">Pflicht</button>
+</div>
+
+<div id="menu-toggle" onclick="toggleMenu()">☰</div>
+
+<div id="mode-menu">
+  <div class="mode-btn selected" onclick="toggleMode('Friends')">Friends</div>
+  <div class="mode-btn" onclick="toggleMode('Church')">Church</div>
+  <div class="mode-btn" id="spicy-btn" onclick="toggleMode('Spicy')" style="display:none;">Spicy</div>
+</div>
+
+<script>
+// ===== Variablen & Arrays =====
+let selectedModes=["Friends"];
+let friendsCounter=0;
+
+const ideas={
+  Friends:{
+    truth:[
+      "Wann hast du deinem Freund das letzte Mal wirklich geholfen?",
+      "Erzähle deinem Freund von einer lustigen Situation, die dir passiert ist.",
+      "Welche Eigenschaft eines Freundes bewunderst du am meisten?",
+      "Was war der peinlichste Moment, den du mit einem Freund erlebt hast?",
+      "Wann hast du einem Freund das letzte Mal ein Geheimnis anvertraut?",
+      "Welche gemeinsame Aktivität mit einem Freund würdest du gerne wiederholen?",
+      "Erzähle deinem Freund, wann du dich besonders über seine Unterstützung gefreut hast.",
+      "Wer in deiner Freundesgruppe bringt dich am meisten zum Lachen und warum?",
+      "Welche kleine Geste eines Freundes hat dich besonders berührt?",
+      "Erzähle deinem Freund, welche Herausforderung ihr gemeinsam meistern könntet.",
+      "Wann hast du deinem Freund zuletzt ein Kompliment gemacht?",
+      "Erzähle von einem Moment, in dem ihr zusammen über etwas Peinliches lachen musstet.",
+      "Welche Aktivität würdest du gerne mit einem Freund ausprobieren?",
+      "Wer in deiner Freundesgruppe inspiriert dich am meisten und warum?",
+      "Welche Erinnerung an einen Freund macht dich immer noch glücklich?",
+      "Wann hast du deinem Freund zuletzt geholfen, etwas Neues zu lernen?",
+      "Erzähle von einem Moment, in dem ihr euch gegenseitig überrascht habt.",
+      "Welche gemeinsame Reise oder Ausflug hat euch besonders verbunden?",
+      "Wer in eurer Gruppe sorgt immer für gute Stimmung?",
+      "Welche Eigenschaft eines Freundes würdest du gerne selbst entwickeln?",
+      "Wann habt ihr das letzte Mal spontan etwas Ungewöhnliches gemacht?",
+      "Welche kleine Aufmerksamkeit eines Freundes hat dich besonders gefreut?",
+      "Erzähle deinem Freund, wann er dich besonders stolz gemacht hat?",
+      "Wer in deiner Gruppe hat die lustigste Geschichte erlebt?",
+      "Welche Herausforderung habt ihr gemeinsam gemeistert?",
+      "Erzähle deinem Freund, wann ihr das letzte Mal richtig viel Spaß hattet?",
+      "Welche Eigenschaft eines Freundes bewunderst du heimlich?",
+      "Wann hast du einem Freund zuletzt Mut zugesprochen?",
+      "Welche Tradition oder Gewohnheit teilt ihr gemeinsam?",
+      "Erzähle deinem Freund von einer Situation, in der ihr euch gegenseitig geholfen habt.",
+      "Wer in eurer Gruppe überrascht dich am häufigsten?",
+      "Welche gemeinsame Aktivität hat euch besonders eng verbunden?",
+      "Wann habt ihr das letzte Mal gemeinsam etwas Neues ausprobiert?",
+      "Welche kleine Herausforderung habt ihr zusammen erfolgreich gemeistert?",
+      "Erzähle deinem Freund, was du an eurer Freundschaft besonders schätzt.",
+      "Wer bringt in eurer Gruppe die besten Ideen für Spiele oder Aktivitäten?",
+      "Welche Eigenschaft eines Freundes hat dich schon einmal zum Nachdenken gebracht?",
+      "Erzähle von einem Moment, in dem ihr euch gegenseitig motiviert habt.",
+      "Welche lustige Situation mit einem Freund wirst du nie vergessen?",
+      "Wann habt ihr das letzte Mal zusammen gelacht, bis ihr Bauchschmerzen hattet?",
+      "Welche Eigenschaft eines Freundes hilft euch, schwierige Situationen zu meistern?",
+      "Erzähle deinem Freund, wann ihr gemeinsam etwas Außergewöhnliches geschafft habt.",
+      "Wer in eurer Gruppe hat die kreativsten Ideen?",
+      "Welche peinliche Situation habt ihr zusammen überwunden?",
+      "Erzähle deinem Freund, wann er dich besonders überrascht hat.",
+      "Welche gemeinsame Erinnerung bringt euch immer noch zum Lächeln?",
+      "Wer in eurer Gruppe ist besonders zuverlässig in schwierigen Situationen?",
+      "Welche kleine Geste eines Freundes hat dir gezeigt, wie viel er dir bedeutet?",
+      "Erzähle von einem Moment, in dem ihr euch gegenseitig Mut gemacht habt.",
+      "Welche Herausforderung würdest du gerne zusammen mit einem Freund meistern?",
+      "Wann habt ihr das letzte Mal gemeinsam etwas Verrücktes unternommen?",
+      "Welche Eigenschaft eines Freundes macht eure Freundschaft besonders stark?",
+      "Erzähle deinem Freund, wann ihr zusammen richtig stolz wart.",
+      "Wer bringt euch in eurer Gruppe am schnellsten zum Lachen?",
+      "Welche gemeinsame Aktivität würdest du gerne öfter machen?",
+      "Wann habt ihr das letzte Mal etwas Unvorhergesehenes zusammen erlebt?",
+      "Welche kleine Aufmerksamkeit eines Freundes hat dir den Tag verschönert?",
+      "Erzähle deinem Freund von einer Zeit, in der ihr euch gegenseitig unterstützt habt.",
+      "Wer in eurer Gruppe ist der beste Ratgeber?",
+      "Welche Eigenschaft eines Freundes beeindruckt dich am meisten?",
+      "Erzähle von einem Moment, in dem ihr zusammen über etwas Gelungenes gefreut habt.",
+      "Welche lustige Erinnerung würdest du gerne wieder erleben?",
+      "Wer sorgt in eurer Gruppe für die kreativsten Ideen?",
+      "Welche Erfahrung hat eure Freundschaft besonders geprägt?",
+      "Erzähle deinem Freund von einer Situation, in der ihr zusammen Mut bewiesen habt.",
+      "Wann habt ihr das letzte Mal gemeinsam über etwas Peinliches gelacht?",
+      "Welche kleine Herausforderung habt ihr zusammen gemeistert?",
+      "Erzähle deinem Freund, was euch als Gruppe besonders verbindet.",
+      "Wer in eurer Freundesgruppe hat die originellsten Ideen?",
+      "Welche Eigenschaft eines Freundes hilft dir, dich selbst zu verbessern?",
+      "Wann habt ihr das letzte Mal spontan eine neue Aktivität ausprobiert?",
+      "Welche gemeinsame Erinnerung würdest du gerne für immer behalten?",
+      "Erzähle deinem Freund von einem Moment, in dem ihr euch gegenseitig überrascht habt.",
+      "Wer bringt in eurer Gruppe immer gute Laune?",
+      "Welche lustige Situation habt ihr kürzlich gemeinsam erlebt?",
+      "Wann habt ihr das letzte Mal zusammen etwas Verrücktes gemacht?",
+      "Welche kleine Geste eines Freundes zeigt dir, wie sehr er dich schätzt?",
+      "Erzähle von einem Moment, in dem ihr euch gegenseitig Mut zugesprochen habt.",
+      "Welche Herausforderung habt ihr zusammen erfolgreich gemeistert?",
+      "Wann hast du zuletzt einen Freund besonders unterstützt?",
+      "Wer in eurer Gruppe hat die größten Abenteuerideen?",
+      "Welche Aktivität würdest du gerne gemeinsam wiederholen?",
+      "Erzähle deinem Freund, was dich an eurer Freundschaft am meisten beeindruckt.",
+      "Welche Eigenschaft eines Freundes würdest du gerne selbst entwickeln?",
+      "Wer bringt dich in eurer Gruppe am häufigsten zum Lachen?",
+      "Wann habt ihr zuletzt spontan etwas gemeinsam unternommen?",
+      "Welche kleine Aufmerksamkeit eines Freundes hat dir besonders gefallen?",
+      "Erzähle von einem Moment, in dem ihr euch gegenseitig überrascht habt.",
+      "Welche gemeinsame Erinnerung bringt dich immer wieder zum Lächeln?",
+      "Wer ist in eurer Gruppe besonders hilfsbereit?",
+      "Welche lustige Tradition habt ihr mit Freunden gestartet?",
+      "Wann habt ihr zuletzt zusammen über etwas Peinliches gelacht?",
+      "Welche Herausforderung würdest du gerne gemeinsam mit einem Freund meistern?",
+      "Erzähle deinem Freund von einem Moment, in dem ihr euch gegenseitig unterstützt habt.",
+      "Wer in eurer Gruppe hat die besten Ideen für Spiele oder Aufgaben?",
+      "Welche Eigenschaft eines Freundes inspiriert dich am meisten?",
+      "Wann habt ihr das letzte Mal zusammen etwas Neues ausprobiert?",
+      "Welche kleine Geste eines Freundes bleibt dir in Erinnerung?",
+      "Erzähle deinem Freund von einem Moment, in dem ihr zusammen stolz wart.",
+      "Welche gemeinsame Aktivität hat euch als Gruppe enger verbunden?",
+      "Wer bringt in eurer Gruppe am meisten Spaß und Freude?",
+      "Welche peinliche Situation habt ihr zusammen gemeistert?",
+      "Erzähle deinem Freund, welche kleine Herausforderung ihr zusammen bewältigt habt.",
+      "Welche Erfahrung hat eure Freundschaft am meisten gestärkt?",
+      "Wann habt ihr das letzte Mal zusammen gelacht bis zum Bauchweh?",
+      "Welche Eigenschaft eines Freundes macht eure Freundschaft besonders wertvoll?"
+    ],
+    dare:[
+      "Umarme eine Person deiner Wahl 10 Sekunden.",
+      "Küsse die Person links von dir auf die Wange.",
+      "Küsse die Person rechts von dir auf die Wange.",
+      "Lege deine Hand 10 Sekunden auf das Bein einer Person.",
+      "Halte eine Person 15 Sekunden im Arm.",
+      "Flüstere einer Person ein Kompliment ins Ohr.",
+      "Setze dich bewusst näher zu einer Person.",
+      "Spiele 10 Sekunden pantomimisch eure Freundschaft nach.",
+      "Mach ein Selfie mit einer Person deiner Wahl.",
+      "Tanze 15 Sekunden mit einer Person deiner Wahl.",
+      "Umarme deinen Freund für 10 Sekunden.",
+      "Tanze 15 Sekunden wie ein Rockstar, während die Gruppe zusieht.",
+      "Erzähle einen Witz und bringe mindestens einen Freund zum Lachen.",
+      "Springe einmal hoch und rufe laut den Namen eines Freundes.",
+      "Erkläre auf eine lustige Art, warum dein Freund großartig ist.",
+      "Mach ein Selfie mit einem Freund und zeige es der Gruppe.",
+      "Führe eine Grimasse vor, bis ein Freund lacht.",
+      "Spiele pantomimisch eine Alltagssituation nach und lasse die Gruppe raten.",
+      "Erfinde spontan einen lustigen Spitznamen für einen Freund.",
+      "Imitiere den Lieblingssport eines Freundes für 15 Sekunden.",
+      "Umarme die Person links von dir für 5 Sekunden.",
+      "Zeige, wie man eine unsichtbare Blume überreicht.",
+      "Sprich 10 Sekunden lang wie ein Nachrichtensprecher über einen Freund.",
+      "Tu so, als würdest du eine Gruppe Freunde anfeuern, als wären sie bei den Olympischen Spielen.",
+      "Erzähle eine peinliche Geschichte über dich selbst, die noch niemand kennt.",
+      "Umarme alle Personen um dich herum einmal kurz.",
+      "Stell eine kurze Szene aus einem Film nach, in der Freunde zusammenhalten.",
+      "Erfinde eine kleine Tanzchoreografie mit einem Freund und führe sie vor.",
+      "Zeige 5 Sekunden lang ein besonders dramatisches Lachen.",
+      "Tu so, als würdest du einen unsichtbaren Freund vorstellen.",
+      "Springe auf einem Bein durch den Raum und rufe dabei die Namen der Freunde.",
+      "Führe ein 10-sekündiges Streitgespräch mit einem Freund pantomimisch vor.",
+      "Zeige eine Superheldenpose mit deinem besten Freund.",
+      "Erzähle eine kurze Geschichte über ein Missgeschick, das dir mit einem Freund passiert ist.",
+      "Umarme die Person rechts von dir für 5 Sekunden.",
+      "Zeige, wie du ein gemeinsames Abenteuer mit einem Freund pantomimisch erleben würdest.",
+      "Sprich 10 Sekunden lang wie ein Sportkommentator über deine Freunde.",
+      "Tu so, als würdest du einem Freund einen unsichtbaren Pokal überreichen.",
+      "Erfinde einen neuen Tanzschritt und bringe mindestens einen Freund zum Mitmachen.",
+      "Stell dir vor, du bist ein Lehrer und erkläre den Freunden ein besonders lustiges Ereignis.",
+      "Umarme die Person gegenüber dir für 10 Sekunden.",
+      "Zeige, wie man jemanden motiviert, wenn er traurig ist (pantomimisch).",
+      "Tu so, als würdest du ein besonders dramatisches Geheimnis preisgeben.",
+      "Stell eine lustige Szene nach, die ihr einmal gemeinsam erlebt habt.",
+      "Erfinde spontan einen neuen Gruß für eure Freundesgruppe.",
+      "Führe eine 10-sekündige Nachrichtensendung über die Gruppe auf.",
+      "Umarme deinen besten Freund für 15 Sekunden und sage, was du an ihm schätzt.",
+      "Tu so, als würdest du eine olympische Disziplin nur mit Umarmungen durchführen.",
+      "Zeige pantomimisch, wie ihr gemeinsam ein Abenteuer erlebt.",
+      "Spiele eine Szene nach, in der jemand in der Gruppe mutig ist.",
+      "Erfinde einen kurzen, lustigen Song über eure Freundschaft.",
+      "Umarme die Person links und rechts gleichzeitig kurz.",
+      "Tu so, als würdest du einem Freund ein besonders wertvolles unsichtbares Geschenk geben.",
+      "Führe eine 10-sekündige Szene vor, in der ihr euch gegenseitig unterstützt.",
+      "Erzähle eine lustige Anekdote aus deinem Alltag und beziehe Freunde ein.",
+      "Umarme jeden Spieler einmal in einer Reihe.",
+      "Stell pantomimisch dar, wie man gemeinsam ein Problem löst.",
+      "Tu so, als würdest du ein besonders dramatisches Ereignis in der Gruppe nachspielen.",
+      "Erfinde spontan einen geheimen Handschlag mit einem Freund.",
+      "Zeige, wie man gemeinsam eine unsichtbare Wand überwindet (pantomimisch).",
+      "Erzähle eine Geschichte, in der ihr alle zusammen eine Herausforderung gemeistert habt.",
+      "Umarme die Person, die am ruhigsten ist, für 10 Sekunden.",
+      "Tu so, als würdest du einen Preis für den mutigsten Freund überreichen.",
+      "Spiele 15 Sekunden lang eine Szene, in der ihr zusammen lacht, ohne Worte.",
+      "Erfinde ein 10-sekündiges Geräuschspiel, bei dem jeder mitmacht.",
+      "Umarme deinen Freund für 20 Sekunden und sage, was er dir bedeutet.",
+      "Tu so, als würdest du ein Missgeschick dramatisch nachspielen.",
+      "Zeige, wie man gemeinsam einen unsichtbaren Berg erklimmt (pantomimisch).",
+      "Führe ein 10-sekündiges Quiz über die Gruppe auf.",
+      "Umarme die Person, die am lautesten lacht, für 10 Sekunden.",
+      "Tu so, als würdest du eine besonders peinliche Szene pantomimisch darstellen.",
+      "Erfinde einen kurzen Tanz, der die ganze Freundesgruppe mit einbezieht.",
+      "Zeige 10 Sekunden lang, wie man ein imaginäres Geschenk überreicht.",
+      "Umarme die Person, die gerade am meisten Unterstützung braucht, für 10 Sekunden.",
+      "Spiele eine Szene nach, in der alle zusammen ein Rätsel lösen.",
+      "Erfinde spontan ein kurzes Theater-Szene mit einem Freund.",
+      "Umarme deinen Freund für 15 Sekunden, während du ein Kompliment machst.",
+      "Tu so, als würdest du eine besonders dramatische Nachricht verkünden.",
+      "Führe 10 Sekunden lang eine inspirierende Rede für die Gruppe auf.",
+      "Erzähle eine peinliche Geschichte aus deiner Kindheit.",
+      "Umarme die Person, die am weitesten weg sitzt, kurz.",
+      "Zeige, wie man gemeinsam ein imaginäres Hindernis überwindet.",
+      "Spiele eine Szene nach, in der ihr gemeinsam eine Mutprobe besteht.",
+      "Erfinde spontan ein kurzes Gedicht über die Freundschaft in der Gruppe.",
+      "Umarme jeden in der Reihe einmal kurz.",
+      "Tu so, als würdest du ein besonders spannendes Ereignis pantomimisch darstellen.",
+      "Zeige, wie man zusammen ein unsichtbares Problem löst.",
+      "Erfinde spontan einen kleinen Tanz zu einem unsichtbaren Lied.",
+      "Umarme die Person, die am stillsten ist, für 10 Sekunden.",
+      "Spiele eine Szene nach, in der jemand in der Gruppe besonders mutig ist.",
+      "Tu so, als würdest du einen Freund für eine besondere Leistung loben.",
+      "Erzähle eine kurze, peinliche Situation und beziehe Freunde ein.",
+      "Umarme die Person, die am lautesten lacht, für 15 Sekunden.",
+      "Stell pantomimisch dar, wie ihr zusammen etwas Schwieriges bewältigt.",
+      "Erfinde spontan ein kurzes Theaterstück mit allen Freunden.",
+      "Umarme die Person, die am meisten Unterstützung braucht, für 15 Sekunden.",
+      "Tu so, als würdest du einen lustigen Preis für einen Freund erfinden.",
+      "Zeige, wie ihr gemeinsam eine unsichtbare Herausforderung meistert.",
+      "Führe 10 Sekunden lang ein imaginäres Abenteuer mit einem Freund auf.",
+      "Umarme die Person links für 10 Sekunden.",
+      "Erfinde spontan eine kurze Geschichte über eure Freundschaft.",
+      "Tu so, als würdest du einen geheimen Freundschafts-Code demonstrieren.",
+      "Zeige 10 Sekunden lang, wie ihr alle zusammen lachen könntet.",
+      "Umarme die Person rechts für 10 Sekunden.",
+      "Stell pantomimisch dar, wie ihr gemeinsam etwas Lustiges erlebt.",
+      "Erfinde spontan ein kurzes Lied über eure Gruppe.",
+      "Umarme deinen Freund und sage, warum er besonders ist.",
+      "Tu so, als würdest du einen unsichtbaren Schatz mit einem Freund finden.",
+      "Zeige, wie man zusammen eine peinliche Situation meistert (pantomimisch).",
+      "Führe 15 Sekunden lang eine Szene auf, in der ihr zusammen Spaß habt.",
+      "Umarme die Person, die am nächsten sitzt, für 10 Sekunden.",
+      "Erfinde spontan eine kleine sportliche Aktivität für die Gruppe.",
+      "Tu so, als würdest du die Gruppe für ein Abenteuer motivieren.",
+      "Zeige 10 Sekunden lang, wie man ein imaginäres Problem löst.",
+      "Umarme die Person, die am ruhigsten ist, für 15 Sekunden.",
+      "Spiele eine Szene nach, in der ihr zusammen kreativ seid.",
+      "Erfinde spontan eine kleine Choreografie mit einem Freund.",
+      "Umarme deinen Freund und sag, was du an der Freundschaft schätzt.",
+      "Tu so, als würdest du alle Freunde auf eine imaginäre Schatzsuche schicken.",
+      "Zeige 15 Sekunden lang, wie ihr zusammen Herausforderungen meistert.",
+      "Erzähle eine lustige Situation, die alle in der Gruppe betrifft.",
+      "Umarme jeden Spieler einmal für 5 Sekunden.",
+      "Tu so, als würdest du ein unsichtbares Spiel mit einem Freund spielen."
+    ]
+  },
+  Church:{
+    truth:[
+      "Erzähle deinem Freund von einem Moment, in dem du Gott besonders nah gespürt hast.",
+      "Welcher Bibelvers hat dir zuletzt Hoffnung gegeben und warum?",
+      "Teile eine Erfahrung, die deinen Glauben gestärkt hat.",
+      "Was bedeutet Nächstenliebe für dich im Alltag?",
+      "Erzähle von einer Situation, in der du einem Menschen bewusst geholfen hast.",
+      "Wie reagierst du, wenn du vor einer schwierigen Entscheidung stehst?",
+      "Welches Gebet hat dich in letzter Zeit besonders bewegt?",
+      "Erzähle deinem Freund von einer Zeit, in der du dich für andere eingesetzt hast.",
+      "Welche Charaktereigenschaft Gottes bewunderst du am meisten?",
+      "Wie würdest du einem neuen Freund deinen Glauben erklären?",
+      "Teile einen Moment, in dem dich ein Bibelvers inspiriert hat.",
+      "Welche Handlung hat dich zuletzt als Christ besonders stolz gemacht?",
+      "Erzähle, wann du zuletzt Dankbarkeit bewusst empfunden hast.",
+      "Welche Herausforderung im Glauben hast du kürzlich erlebt?",
+      "Erzähle von einem Erlebnis, das dir gezeigt hat, was Vertrauen bedeutet.",
+      "Welcher Bibelvers beschreibt am besten deine Einstellung zum Leben?",
+      "Wie zeigst du Liebe und Mitgefühl im Alltag?",
+      "Erzähle deinem Freund von einem Moment, in dem du Mut gebraucht hast.",
+      "Welche Lektion aus der Bibel ist dir besonders wichtig?",
+      "Wann hast du zuletzt jemandem verziehen, der dich verletzt hat?",
+      "Erzähle von einem Gebet, das dir besonders Kraft gegeben hat.",
+      "Wie hilfst du anderen, ihren Glauben zu entdecken?",
+      "Teile ein Erlebnis, das dir gezeigt hat, dass du nicht allein bist.",
+      "Welche Person in deinem Leben inspiriert dich im Glauben am meisten?",
+      "Wie würdest du deinen Glauben in einem Satz zusammenfassen?",
+      "Erzähle von einem Moment, in dem du Hoffnung geschenkt hast.",
+      "Welche Bibelgeschichte hat dich zuletzt tief berührt?",
+      "Wie reagierst du, wenn du Ungerechtigkeit siehst?",
+      "Teile eine Situation, in der du bewusst freundlich zu jemandem warst.",
+      "Erzähle deinem Freund von einem Moment, in dem du Gottes Nähe gespürt hast.",
+      "Welche Gebetsform hilft dir am meisten, dich zu konzentrieren?",
+      "Teile eine Erfahrung, die deinen Glauben auf die Probe gestellt hat.",
+      "Welche positive Veränderung hast du durch deinen Glauben erfahren?",
+      "Erzähle von einem Moment, in dem du dich in einer Gruppe verbunden gefühlt hast.",
+      "Welche Eigenschaft Gottes möchtest du in deinem Leben nachahmen?",
+      "Wie würdest du jemanden ermutigen, der den Glauben verloren hat?",
+      "Erzähle von einem Moment, in dem du einen Freund in Glaubensfragen unterstützt hast.",
+      "Welche Bibelstelle hilft dir in schwierigen Zeiten?",
+      "Wie gehst du mit Zweifeln an deinem Glauben um?",
+      "Teile eine Situation, in der du durch den Glauben Hoffnung gefunden hast.",
+      "Erzähle deinem Freund von einer guten Tat, die du kürzlich vollbracht hast.",
+      "Welche Bibelstelle würdest du einem neuen Freund empfehlen?",
+      "Wie beeinflusst dein Glaube deine Entscheidungen?",
+      "Erzähle von einem Moment, in dem du jemanden zum Lächeln gebracht hast.",
+      "Welche Lektion aus deinem Glauben hilft dir täglich?",
+      "Teile eine Situation, in der du bewusst Nächstenliebe gezeigt hast.",
+      "Erzähle von einem Moment, in dem dein Glaube dich getröstet hat.",
+      "Welche Charaktereigenschaft Gottes würdest du gerne stärker entwickeln?",
+      "Wie teilst du deinen Glauben mit Menschen, die ihn noch nicht kennen?",
+      "Erzähle deinem Freund von einem Moment, in dem du mutig gehandelt hast.",
+      "Welche Bibelgeschichte beschreibt am besten Freundschaft?",
+      "Wie gehst du damit um, wenn du Fehler machst?",
+      "Teile eine Erfahrung, in der du einen Unterschied im Leben eines anderen gemacht hast.",
+      "Erzähle von einem Moment, in dem du Dankbarkeit besonders gespürt hast.",
+      "Welche Gebetsroutine hilft dir, Ruhe zu finden?",
+      "Wie teilst du deine Glaubensfreude mit anderen?",
+      "Erzähle von einer Situation, in der du durch den Glauben Kraft gefunden hast.",
+      "Welche Bibelstelle hat dich zuletzt inspiriert zu handeln?",
+      "Wie gehst du mit Herausforderungen in deiner Gemeinschaft um?",
+      "Teile eine Erfahrung, die dich gelehrt hat, geduldig zu sein.",
+      "Erzähle deinem Freund, wie du deine Glaubensziele erreichst.",
+      "Welche Person hat dich im Glauben besonders geprägt?",
+      "Wie würdest du jemanden trösten, der seinen Glauben verloren hat?",
+      "Erzähle von einem Moment, in dem du aktiv Hoffnung geschenkt hast.",
+      "Welche Bibelstelle hilft dir, dich zu motivieren?",
+      "Wie teilst du in der Gruppe deine Glaubenserfahrungen?",
+      "Teile eine Situation, in der du bewusst anderen Mut gemacht hast.",
+      "Erzähle deinem Freund, wie du Dankbarkeit im Alltag lebst.",
+      "Welche positive Erfahrung hast du durch das Beten gemacht?",
+      "Wie gehst du damit um, wenn ein Freund Zweifel hat?",
+      "Erzähle von einem Moment, in dem du jemanden inspiriert hast.",
+      "Welche Lektion aus dem Glauben hilft dir in Beziehungen?",
+      "Teile eine Situation, in der du jemandem bewusst vergeben hast.",
+      "Wie würdest du einem neuen Freund den Glauben näherbringen?",
+      "Erzähle deinem Freund von einer Erfahrung, die dich tief berührt hat.",
+      "Welche Bibelstelle ist dir besonders wichtig für deine Freundschaften?",
+      "Wie zeigst du in der Gruppe, dass du für andere da bist?",
+      "Teile einen Moment, in dem du bewusst Frieden gestiftet hast.",
+      "Erzähle von einem Moment, in dem du deinen Glauben lebendig gespürt hast.",
+      "Welche Gebetsform hilft dir, dich auf Gott zu konzentrieren?",
+      "Wie gehst du mit Konflikten in der Freundesgruppe um?",
+      "Erzähle deinem Freund von einem Moment, in dem du Mut gebraucht hast.",
+      "Welche Bibelgeschichte motiviert dich besonders, anderen zu helfen?",
+      "Wie teilst du deine Glaubenserfahrungen in der Gruppe?",
+      "Erzähle von einer Situation, in der du bewusst Geduld geübt hast.",
+      "Welche Lektion aus dem Glauben hat dich zuletzt geprägt?",
+      "Teile einen Moment, in dem du dich von Gott geführt gefühlt hast.",
+      "Erzähle deinem Freund von einem Erlebnis, das deine Hoffnung gestärkt hat.",
+      "Welche Bibelstelle hat dich zuletzt inspiriert?",
+      "Wie würdest du einem Freund zeigen, dass du für ihn betest?",
+      "Erzähle von einer Situation, in der du bewusst Mitgefühl gezeigt hast.",
+      "Welche Charaktereigenschaft Gottes möchtest du besonders im Alltag nachahmen?",
+      "Wie teilst du in der Gruppe positive Glaubenserfahrungen?",
+      "Erzähle deinem Freund, wann du zuletzt einen Glaubensimpuls erlebt hast.",
+      "Welche Bibelstelle hilft dir in Momenten der Unsicherheit?",
+      "Wie gehst du damit um, wenn ein Freund Unterstützung im Glauben braucht?",
+      "Teile eine Erfahrung, in der dein Glaube dich ermutigt hat.",
+      "Erzähle von einem Moment, in dem du einem anderen Hoffnung gegeben hast.",
+      "Welche Lektion aus dem Glauben hilft dir täglich in der Gruppe?",
+      "Wie teilst du deine Dankbarkeit mit anderen?",
+      "Erzähle deinem Freund von einer Situation, in der du aktiv Mut gezeigt hast.",
+      "Welche Bibelstelle hat dich zuletzt inspiriert, etwas zu verändern?",
+      "Wie gehst du damit um, wenn du Fehler machst?",
+      "Teile einen Moment, in dem du bewusst Liebe gezeigt hast.",
+      "Erzähle von einem Moment, in dem du durch den Glauben Trost gefunden hast.",
+      "Welche Charaktereigenschaft Gottes hat dich zuletzt beeindruckt?",
+      "Wie würdest du einem neuen Freund deine Glaubenserfahrungen erklären?",
+      "Erzähle deinem Freund von einer Situation, in der du besonders dankbar warst.",
+      "Welche Bibelstelle motiviert dich, aktiv zu werden?",
+      "Wie teilst du positive Glaubenserlebnisse in der Gruppe?",
+      "Erzähle von einem Moment, in dem du bewusst Freundlichkeit gezeigt hast.",
+      "Welche Lektion aus deinem Glauben hilft dir in schwierigen Momenten?",
+      "Teile eine Situation, in der du einen Unterschied im Leben eines Freundes gemacht hast.",
+      "Erzähle deinem Freund von einem Moment, in dem du Gottes Nähe gespürt hast.",
+      "Welche Bibelstelle inspiriert dich, anderen Hoffnung zu geben?",
+      "Wie teilst du deinen Glauben in alltäglichen Situationen?",
+      "Erzähle von einer Situation, in der du bewusst anderen Mut gemacht hast.",
+      "Welche Erfahrung hat deinen Glauben besonders gestärkt?",
+      "Wie würdest du einem Freund erklären, warum Glauben wichtig ist?",
+      "Erzähle deinem Freund von einer Situation, in der du bewusst anderen geholfen hast."
+    ],
+    dare:[
+      "Lies laut Sprüche 17,22 (Ein fröhliches Herz tut dem Leib wohl, aber ein betrübtes Gemüt vertrocknet das Gebein).",
+      "Sprich ein kleines Gebet für jemanden in der Gruppe.",
+      "Lies laut Johannes 3,16 (Denn also hat Gott die Welt geliebt, dass er seinen eingeborenen Sohn gab, damit alle, die an ihn glauben, nicht verloren gehen, sondern ewiges Leben haben).",
+      "Erzähle humorvoll, was du aus einer Bibelgeschichte gelernt hast.",
+      "Segne jemanden aus der Gruppe mit einem Wunsch für die kommende Woche.",
+      "Stelle eine Bibelgeschichte pantomimisch nach, sodass die Gruppe sie erraten muss.",
+      "Erzähle deinem Freund, was du aus dem heutigen Tag mit Gott gelernt hast.",
+      "Sprich ein kurzes Dankgebet laut vor allen.",
+      "Führe eine kurze Szene aus dem Leben Jesu nach, lustig oder ernst, je nach Stimmung.",
+      "Lies laut Psalm 23,1-4 (Der Herr ist mein Hirte; mir wird nichts mangeln...).",
+      "Segne jemanden still in Gedanken, aber erkläre danach, warum du es getan hast.",
+      "Erkläre in 30 Sekunden, warum ein bestimmter Bibelvers für dich besonders ist.",
+      "Spiele 15 Sekunden lang pantomimisch die Schöpfungsgeschichte nach.",
+      "Führe eine 10-Sekunden-Ansprache über Nächstenliebe auf.",
+      "Lies laut Psalm 46,2 (Gott ist unsre Zuflucht und Stärke, ein bewährter Helfer in Zeiten der Not).",
+      "Erzähle eine humorvolle Anekdote aus dem Leben eines Propheten.",
+      "Segne jemanden mit einem witzigen, aber positiven Wunsch.",
+      "Sprich ein kurzes Friedensgebet für die ganze Gruppe.",
+      "Lies laut Psalm 100,1-3 (Jauchzet dem Herrn, alle Welt! Dienet dem Herrn mit Freuden...).",
+      "Zeige pantomimisch, wie du David gegen Goliath spielen würdest.",
+      "Führe ein Dankgebet für einen Freund laut auf.",
+      "Lies laut Matthäus 5,9 (Selig sind die Friedfertigen, denn sie werden Gottes Kinder heißen).",
+      "Segne die Person rechts von dir mit einem kurzen Wunsch.",
+      "Sprich ein kurzes Gebet für jemanden, der heute traurig ist.",
+      "Führe eine kleine Szene aus dem Leben der Apostel pantomimisch auf.",
+      "Lies laut Psalm 27,1 (Der Herr ist mein Licht und mein Heil; vor wem sollte ich mich fürchten?).",
+      "Segne jemanden mit einem imaginären Lichtstrahl.",
+      "Erzähle humorvoll, welche Lektion du aus einer Geschichte über Mose gelernt hast.",
+      "Lies laut Jesaja 41,10 (Fürchte dich nicht, denn ich bin mit dir...).",
+      "Sprich ein kurzes Gebet für die Hoffnung in der Gruppe.",
+      "Führe eine Szene aus der Bergpredigt pantomimisch auf.",
+      "Lies laut 1. Korinther 13,4-5 (Die Liebe ist langmütig, die Liebe ist gütig...).",
+      "Segne die Gruppe mit einem imaginären Regenbogen.",
+      "Erzähle humorvoll, wie die Jünger auf ein modernes Wunder reagieren würden.",
+      "Lies laut Psalm 34,9 (Schmecket und sehet, wie freundlich der Herr ist.).",
+      "Führe pantomimisch eine Szene aus der Apostelgeschichte auf.",
+      "Sprich ein kurzes Gebet für Mut und Vertrauen in schwierigen Momenten.",
+      "Lies laut Römer 12,12 (Seid fröhlich in Hoffnung, geduldig in Trübsal, beharrlich im Gebet).",
+      "Segne jemanden still mit einem positiven Gedanken.",
+      "Erzähle humorvoll, wie ein Prophet heute aussehen würde.",
+      "Lies laut Matthäus 6,33 (Trachtet zuerst nach dem Reich Gottes und nach seiner Gerechtigkeit...).",
+      "Führe eine Szene aus dem Gleichnis vom barmherzigen Samariter pantomimisch auf.",
+      "Sprich ein kurzes Gebet für die Freude aller Anwesenden.",
+      "Lies laut Psalm 119,105 (Dein Wort ist eine Leuchte für meinen Fuß und ein Licht auf meinem Weg).",
+      "Segne einen Freund mit einem imaginären Schutzengel.",
+      "Erzähle humorvoll, wie du die Arche Noah darstellen würdest.",
+      "Lies laut Philipper 4,13 (Alles vermag ich durch den, der mich stark macht).",
+      "Führe pantomimisch das Gleichnis vom verlorenen Sohn auf.",
+      "Sprich ein Dankgebet für alles Gute, das die Gruppe zusammen erlebt hat.",
+      "Lies laut Epheser 4,32 (Seid aber untereinander freundlich und herzlich und vergebt einander...).",
+      "Segne die ganze Gruppe mit einem unsichtbaren Schutz.",
+      "Erzähle humorvoll, was du aus David und Goliath gelernt hast.",
+      "Lies laut Psalm 46,10 (Seid still und erkennet, dass ich Gott bin).",
+      "Sprich ein kurzes Gebet für Frieden, Hoffnung und Freundschaft in der Gruppe.",
+      "Lies laut Johannes 14,27 (Frieden lasse ich euch, meinen Frieden gebe ich euch...).",
+      "Führe eine kurze Szene aus dem Leben Jesu pantomimisch auf.",
+      "Segne die Person links von dir mit einem imaginären Segen.",
+      "Erzähle humorvoll, welche Bibelgeschichte dich zuletzt beeindruckt hat.",
+      "Lies laut Matthäus 11,28 (Kommt her zu mir, alle, die ihr mühselig und beladen seid...).",
+      "Sprich ein kurzes Gebet für Freude und Gelassenheit der Gruppe.",
+      "Führe pantomimisch eine Szene aus der Heilung des Blindgeborenen auf.",
+      "Lies laut Psalm 121,1-2 (Ich hebe meine Augen auf zu den Bergen, von wo mir Hilfe kommt...).",
+      "Segne jemanden mit einem imaginären Schutzschild.",
+      "Erzähle humorvoll, wie die Jünger auf Social Media reagieren würden.",
+      "Lies laut Josua 1,9 (Sei stark und mutig! Fürchte dich nicht, denn der Herr, dein Gott, ist mit dir...).",
+      "Sprich ein Dankgebet für die kleinen Dinge im Alltag.",
+      "Führe eine Szene aus dem Gleichnis vom Senfkorn pantomimisch auf.",
+      "Lies laut Psalm 37,4 (Habe deine Lust am Herrn, so wird er dir geben, was dein Herz begehrt).",
+      "Segne die Person rechts von dir mit einem kurzen positiven Wunsch.",
+      "Erzähle humorvoll, wie ein modernes Wunder heute aussehen könnte.",
+      "Lies laut Römer 8,28 (Wir wissen aber, dass denen, die Gott lieben, alle Dinge zum Besten dienen).",
+      "Führe eine Szene aus dem Leben eines Propheten pantomimisch auf.",
+      "Sprich ein kurzes Gebet für Mut, Freundschaft und Vertrauen.",
+      "Lies laut Psalm 19,1 (Die Himmel erzählen die Herrlichkeit Gottes, und das Himmelsgewölbe verkündet sein Werk).",
+      "Segne die Gruppe mit einem unsichtbaren Geschenk der Freude.",
+      "Erzähle humorvoll, wie die zehn Gebote heute erklärt werden könnten.",
+      "Lies laut 1. Johannes 4,18 (Die Liebe kennt keine Furcht; die vollkommene Liebe treibt die Furcht aus).",
+      "Sprich ein kurzes Gebet für Geduld und Gelassenheit.",
+      "Führe pantomimisch die Speisung der 5000 auf.",
+      "Lies laut Psalm 103,1-2 (Lobe den Herrn, meine Seele, und vergiss nicht, was er dir Gutes getan hat).",
+      "Segne jemanden still mit einem Wunsch für Gesundheit und Freude.",
+      "Erzähle humorvoll, wie die Wunder Jesu heute erklärt würden.",
+      "Lies laut Matthäus 5,14 (Ihr seid das Licht der Welt. Eine Stadt, die auf einem Berg liegt, kann nicht verborgen bleiben).",
+      "Sprich ein kurzes Gebet für Mut und Vertrauen in schwierigen Momenten.",
+      "Führe eine Szene aus dem Gleichnis vom barmherzigen Vater pantomimisch auf.",
+      "Lies laut Psalm 16,8 (Ich habe den Herrn allezeit vor Augen; er ist mir zu rechter Hand, ich wanke nicht).",
+      "Segne einen Freund mit einem imaginären Lichtstrahl.",
+      "Erzähle humorvoll, wie die Jünger ein modernes Wunder sehen würden.",
+      "Lies laut Jesaja 40,31 (Die auf den Herrn harren, kriegen neue Kraft; sie laufen und werden nicht müde).",
+      "Sprich ein kurzes Dankgebet für alles, was die Gruppe gelernt hat.",
+      "Führe eine kleine pantomimische Darstellung der Heilung eines Kranken auf.",
+      "Lies laut Matthäus 7,7 (Bittet, so wird euch gegeben; suchet, so werdet ihr finden).",
+      "Segne die Person links von dir mit einem imaginären Segen.",
+      "Erzähle humorvoll, welche Bibelstelle dich zuletzt überrascht oder inspiriert hat.",
+      "Lies laut Psalm 118,24 (Dies ist der Tag, den der Herr gemacht hat; wir wollen uns freuen und fröhlich sein).",
+      "Sprich ein kurzes Gebet für Hoffnung und Freude in der Gruppe."
+    ]
+  },
+  Spicy:{
+    truth:[
+"Wann hattest du dein erstes Kuss-Erlebnis?",
+"Mit wem würdest du am liebsten heimlich ausgehen?",
+"Hast du schon einmal einen Flirt bereut?",
+"Was ist dein wildestes Date-Erlebnis?",
+"Hast du schon einmal jemandem heimlich nachgeschaut?",
+"Mit wem hattest du den peinlichsten Moment im Bett?",
+"Welches Geheimnis über dich würdest du niemandem erzählen?",
+"Hast du schon einmal jemanden beim Küssen ertappt?",
+"Was war dein schrägstes Liebeserlebnis?",
+"Hast du schon einmal ein geheimes Verlangen gehabt?",
+"Mit wem würdest du gerne einmal allein sein?",
+"Was war dein aufregendster Kuss?",
+"Hast du schon einmal in der Öffentlichkeit geflirtet?",
+"Mit wem würdest du am liebsten ein Abenteuer erleben?",
+"Welches Fantasieerlebnis würdest du gerne ausprobieren?",
+"Hast du schon einmal jemanden heimlich beobachtet?",
+"Was ist die kühnste Sache, die du je getan hast?",
+"Hast du schon einmal einen heißen Traum über jemanden gehabt?",
+"Mit wem würdest du gerne für einen Abend die Rollen tauschen?",
+"Was ist dein Lieblingsflirt-Trick?",
+"Hast du schon einmal jemanden absichtlich eifersüchtig gemacht?",
+"Mit wem würdest du gerne heimlich chatten?",
+"Was ist deine Lieblingsposition beim Kuscheln?",
+"Hast du schon einmal jemanden geküsst, den du kaum kanntest?",
+"Mit wem würdest du gerne einen Moment allein genießen?",
+"Was war dein aufregendster Flirt bisher?",
+"Hast du schon einmal jemanden nach einem Kuss gefragt?",
+"Mit wem würdest du gerne ein geheimes Abenteuer erleben?",
+"Was ist das Verrückteste, das du beim Dating getan hast?",
+"Hast du schon einmal ein Date heimlich beobachtet?",
+"Mit wem würdest du gerne einen Moment voller Spannung teilen?",
+"Was ist deine kühnste Fantasie?",
+"Hast du schon einmal jemanden nach einem heißen Blick getäuscht?",
+"Mit wem würdest du gerne eine Nacht unter Sternen verbringen?",
+"Was ist das Verführerischste, was du getan hast?",
+"Hast du schon einmal eine geheime Nachricht geschickt?",
+"Mit wem würdest du gerne heimlich Händchen halten?",
+"Was war das heißeste Kompliment, das du je bekommen hast?",
+"Hast du schon einmal jemanden absichtlich provoziert?",
+"Mit wem würdest du gerne einen spontanen Kuss teilen?",
+"Was ist das wildeste Gedankenspiel, das du hattest?",
+"Hast du schon einmal heimlich jemanden gestreichelt?",
+"Mit wem würdest du gerne auf Tuchfühlung gehen?",
+"Was ist das Verrückteste, das du beim Flirten getan hast?",
+"Hast du schon einmal jemanden im Traum geküsst?",
+"Mit wem würdest du gerne einen Flirt für eine Minute intensivieren?",
+"Was ist das heißeste Szenario, das du dir vorstellen kannst?",
+"Hast du schon einmal jemanden überrascht, den du mochtest?",
+"Mit wem würdest du gerne heimlich ein Geheimnis teilen?",
+"Was ist die frechste Frage, die du je gestellt hast?",
+"Hast du schon einmal jemanden im Chat geflirtet?",
+"Mit wem würdest du gerne ein bisschen Spannung spüren?",
+"Was ist das gewagteste Kompliment, das du gemacht hast?",
+"Hast du schon einmal jemanden beim Blickkontakt erwischt?",
+"Mit wem würdest du gerne heimlich lachen und flirten?",
+"Was ist das spannendste, das du beim Kuscheln erlebt hast?",
+"Hast du schon einmal jemanden beim Tanzen verführt?",
+"Mit wem würdest du gerne ein intensives Spiel spielen?",
+"Was ist die verführerischste Nachricht, die du je verschickt hast?",
+"Hast du schon einmal jemanden mit Absicht neckt?",
+"Mit wem würdest du gerne heimlich einen Moment teilen?",
+"Was war das frechste Erlebnis, das du hattest?",
+"Hast du schon einmal jemanden bei einem Date überrascht?",
+"Mit wem würdest du gerne eine geheime Challenge ausprobieren?",
+"Was ist die mutigste Fantasie, die du je hattest?",
+"Hast du schon einmal jemanden absichtlich geärgert, weil er dich mochte?",
+"Mit wem würdest du gerne einen Moment purer Spannung erleben?",
+"Was ist das aufregendste Geheimnis, das du hast?",
+"Hast du schon einmal jemanden beim Flirt ertappt?",
+"Mit wem würdest du gerne heimlich Händchen halten?",
+"Was ist das kühnste Date, das du dir vorstellen kannst?",
+"Hast du schon einmal einen flüchtigen Kuss heimlich genossen?",
+"Mit wem würdest du gerne eine Nacht voller Spannung verbringen?",
+"Was ist das heißeste Spiel, das du je gespielt hast?",
+"Hast du schon einmal jemanden beim Verführen überrascht?",
+"Mit wem würdest du gerne für einen kurzen Moment flirten?",
+"Was ist die frechste Fantasie, die du jemals hattest?",
+"Hast du schon einmal jemanden durch einen Blick provoziert?",
+"Mit wem würdest du gerne heimlich einen Tanz teilen?",
+"Was ist das verrückteste Abenteuer, das du dir wünschst?",
+"Hast du schon einmal jemanden beim Kuscheln heimlich beobachtet?",
+"Mit wem würdest du gerne einen Moment voller Nervenkitzel teilen?",
+"Was ist die aufregendste Situation, die du dir vorstellen kannst?",
+"Hast du schon einmal jemanden beim Flirten ertappt?",
+"Mit wem würdest du gerne ein geheimes Abenteuer erleben?",
+"Was ist das heißeste Gedankenspiel, das du je hattest?",
+"Hast du schon einmal heimlich jemanden berührt?",
+"Mit wem würdest du gerne eine Spannungsszene erleben?",
+"Was ist das kühnste Spiel, das du je ausprobiert hast?",
+"Hast du schon einmal jemanden beim Kuss erwischt?",
+"Mit wem würdest du gerne heimlich lachen und flirten?",
+"Was ist das verführerischste Szenario, das du dir vorstellen kannst?",
+"Hast du schon einmal jemanden beim Tanzen provoziert?",
+"Mit wem würdest du gerne ein intensives Flirtspiel spielen?",
+"Was ist die frechste Aktion, die du je gemacht hast?",
+"Hast du schon einmal jemanden heimlich geküsst?",
+"Mit wem würdest du gerne eine kurze Nacht voller Spannung verbringen?",
+"Was ist die aufregendste Fantasie, die du hast?",
+"Hast du schon einmal jemanden beim Flirt beobachtet?",
+"Mit wem würdest du gerne heimlich Händchen halten?"
+],
+    dare:[
+      "Umarme eine Person 30 Sekunden.",
+      "Küsse die Person links von dir auf die Wange.",
+      "Küsse die Person rechts von dir auf die Wange.",
+      "Ziehe ein Kleidungsstück aus (harmlos, z.B. Schal, Mütze).",
+      "Halte 10 Sekunden intensiven Augenkontakt.",
+      "Flüstere einer Person ein Kompliment ins Ohr.",
+      "Lege deine Hand auf das Bein einer Person 10 Sekunden.",
+      "Führe 15 Sekunden lang eine verführerische Pose vor.",
+      "Tanze 20 Sekunden mit einer Person deiner Wahl.",
+      "Umarme eine Person von hinten 10 Sekunden.",
+"Umarme eine Person 30 Sekunden lang.",
+"Küsse die Person links von dir auf die Wange.",
+"Küsse die Person rechts von dir auf die Wange.",
+"Flüstere jemandem ein Kompliment ins Ohr.",
+"Mache einen kurzen, sexy Tanz für 15 Sekunden.",
+"Lecke laut ein Bonbon vor allen.",
+"Schicke einer Person ein freches Emoji.",
+"Führe ein kurzes Flirt-Rollenspiel vor.",
+"Tue so, als würdest du jemanden 10 Sekunden verführen.",
+"Mache eine verführerische Grimasse.",
+"Flirte kreativ mit jemandem in der Runde.",
+"Umarme die Person gegenüber für 10 Sekunden.",
+"Spiele eine kurze Verführungsszene pantomimisch.",
+"Zeige pantomimisch dein verführerischstes Lächeln.",
+"Spring auf einem Bein und tue so, als würdest du jemanden verführen.",
+"Streichele übertrieben den Arm einer Person.",
+"Tu so, als würdest du eine geheime Nachricht senden.",
+"Küsse kurz die Schulter einer Person.",
+"Flirte 10 Sekunden lang nur mit Blicken.",
+"Tue so, als würdest du jemanden heimlich beobachten.",
+"Zeige 5 Sekunden lang deinen sexy Gang.",
+"Flüstere einem Freund dein Geheimnis zu.",
+"Imitiere einen Flirt für 15 Sekunden.",
+"Tanze frech um jemanden herum.",
+"Führe eine Szene des Kuschelns pantomimisch vor.",
+"Zeige, wie du jemanden verführerisch anlächelst.",
+"Streichele leicht die Hand einer Person.",
+"Tue so, als würdest du jemanden heimlich necken.",
+"Spring einmal hoch und tue so, als würdest du einen Kuss geben.",
+"Zeige pantomimisch, wie du jemanden flirtend ansprichst.",
+"Führe eine kurze Flirt-Challenge mit einem Freund durch.",
+"Lecke ein Bonbon auf eine freche Art.",
+"Tu so, als würdest du jemanden intensiv ansehen.",
+"Zeige eine kurze, freche Tanzbewegung.",
+"Führe eine Szene eines heimlichen Kusses vor.",
+"Flirte 10 Sekunden lang mit Gestik und Mimik.",
+"Streichele übertrieben die Schulter eines Mitspielers.",
+"Tu so, als würdest du jemanden 15 Sekunden lang verführen.",
+"Küsse die Person links und rechts gleichzeitig kurz.",
+"Tanze sexy um die Person herum.",
+"Zeige, wie man pantomimisch flirtet.",
+"Sprich 10 Sekunden wie jemand, der flirtet.",
+"Lege dich kurz auf den Schoß einer Person (nur spielerisch).",
+"Zeige, wie man geheimnisvoll Blicke austauscht.",
+"Tue so, als würdest du eine Liebesbotschaft überbringen.",
+"Umarme alle Personen einmal kurz.",
+"Streichele übertrieben die Haare einer Person.",
+"Führe eine Szene des Neckens pantomimisch vor.",
+"Flirte 15 Sekunden wie in einem Film.",
+"Küsse die Hand einer Person kurz.",
+"Tu so, als würdest du jemanden aufziehen, der dich mag.",
+"Zeige 10 Sekunden lang deinen verführerischen Blick.",
+"Imitiere ein Date auf witzige Art.",
+"Führe eine Szene eines geheimen Treffens vor.",
+"Umarme die Person, die am stillsten ist, für 10 Sekunden.",
+"Tanze 15 Sekunden auf eine freche Art.",
+"Sprich 10 Sekunden wie ein Flirt-Influencer.",
+"Lege dich spielerisch in die Nähe einer Person.",
+"Tu so, als würdest du jemanden intensiv anschauen.",
+"Zeige eine kurze freche Umarmung.",
+"Führe eine Szene eines Flirt-Spiels vor.",
+"Umarme deinen linken Nachbarn für 10 Sekunden.",
+"Tu so, als würdest du eine geheime Botschaft senden.",
+"Zeige, wie man jemanden neckt und verführt.",
+"Flirte pantomimisch mit der Person rechts von dir.",
+"Führe eine kurze, intensive Kussszene pantomimisch vor.",
+"Umarme die Person, die am lautesten lacht, für 10 Sekunden.",
+"Tu so, als würdest du jemanden charmant beeindrucken.",
+"Tanze pantomimisch mit einer Person deiner Wahl.",
+"Sprich 10 Sekunden lang verführerisch mit Blicken.",
+"Lege dich spielerisch auf den Schoß eines Mitspielers.",
+"Umarme die Person gegenüber 15 Sekunden.",
+"Führe eine Szene des frechen Neckens pantomimisch auf.",
+"Zeige pantomimisch, wie du einen geheimen Flirt startest.",
+"Tanze kurz sexy um eine Person deiner Wahl.",
+"Sprich 10 Sekunden lang flirtend über eine Person.",
+"Zeige deine frechste Umarmung für 5 Sekunden.",
+"Umarme die Person, die am ruhigsten ist, für 15 Sekunden.",
+"Führe eine kurze pantomimische Flirtszene auf.",
+"Zeige pantomimisch, wie man eine geheime Nachricht überbringt.",
+"Tu so, als würdest du jemanden für 10 Sekunden verführen.",
+"Tanze frech um alle Personen in der Runde.",
+"Zeige eine Szene des Kusses pantomimisch.",
+"Umarme die Person rechts von dir für 10 Sekunden.",
+"Tu so, als würdest du jemanden spielerisch necken.",
+"Sprich flirtend 10 Sekunden lang über die Person links von dir.",
+"Zeige, wie man pantomimisch flirtet.",
+"Tanze 15 Sekunden wie ein Filmstar, flirtend.",
+"Umarme die Person, die am weitesten weg sitzt, für 10 Sekunden.",
+"Tu so, als würdest du jemanden charmant ansprechen.",
+"Zeige 10 Sekunden lang, wie man einen geheimen Kuss gibt.",
+"Führe eine kurze Flirtszene pantomimisch auf.",
+"Umarme jeden einmal kurz für 5 Sekunden.",
+"Tu so, als würdest du jemanden 10 Sekunden lang verführen.",
+      "Mache einen Zungenkuss mit einer Person deiner Wahl und lege deine Hand auf den Oberschenkel eines anderen Geschlechts."
+    ]
+  }
+
+};  
+
+// ===== Shuffle-Funktion =====
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+// ===== Listen für aktuelle Modi =====
+let truthList=[], dareList=[];
+
+function rebuildLists(){
+  truthList=[]; dareList=[];
+  selectedModes.forEach(m=>{
+    truthList = truthList.concat(shuffle([...ideas[m].truth]));
+    dareList = dareList.concat(shuffle([...ideas[m].dare]));
+  });
+}
+
+// ===== Theme anwenden =====
+function applyTheme(){
+  document.body.className="";
+  if(selectedModes.length>1){
+    document.body.classList.add("party");
+  }else{
+    document.body.classList.add(selectedModes[0].toLowerCase());
+  }
+}
+
+// ===== Show Idea inkl. automatischem Neustart =====
+function showIdea(type){
+  const list = type === "truth" ? truthList : dareList;
+  
+  if(list.length === 0){
+    document.getElementById("idea-box").innerText = 
+      "Alle Fragen/Aufgaben sind durch – der Pool wird neu gestartet!";
+    
+    setTimeout(() => {
+      rebuildLists(); // Pool neu mischen
+      showIdea(type); // direkt nächste Frage zeigen
+    }, 1500);
+    return;
+  }
+  
+  document.getElementById("idea-box").innerText = list.shift();
+}
+
+// ===== Menü Toggle =====
+function toggleMenu(){
+  const m=document.getElementById("mode-menu");
+  m.style.display=m.style.display==="flex"?"none":"flex";
+}
+
+// ===== Modus Toggle =====
+function toggleMode(mode){
+  if(mode==="Friends"){
+    friendsCounter++;
+    if(friendsCounter>=5){
+      document.getElementById("spicy-btn").style.display="block";
+    }
+  }else{
+    friendsCounter=0;
+  }
+
+  const i=selectedModes.indexOf(mode);
+  if(i>-1) selectedModes.splice(i,1);
+  else selectedModes.push(mode);
+
+  if(selectedModes.length===0) selectedModes.push("Friends");
+
+  document.querySelectorAll(".mode-btn").forEach(b=>{
+    if(selectedModes.includes(b.innerText)) b.classList.add("selected");
+    else b.classList.remove("selected");
+  });
+
+  rebuildLists();
+  applyTheme();
+}
+
+// ===== Initialisierung =====
+rebuildLists();
+applyTheme();
+</script>
+</body>
+</html>
